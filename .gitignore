@@ -103,3 +103,7 @@ $RECYCLE.BIN/
 ### VisualStudioCode ###
 .vscode
 
+### Typings ###
+typings/
+
+dist/

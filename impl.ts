@@ -16,9 +16,7 @@ export function* repeat<T>(item: T, count?: number): IterableIterator<T> {
         for (let i = 0; i < count; i++) {
             yield item;
         }
-    } else {
-        let i = 0;
-        
+    } else {        
         while (true) {
             yield item;
         }
@@ -67,7 +65,7 @@ export function* filter<T>(iter: IterableIterator<T>, fn: PredicateFunction<T>):
     }
 }
 
-export function* take<T>(iter: IterableIterator<T>, count: number): IterableIterator<T> {
+export function* take<T>(iter: IterableIterator<T>, count: number): IterableIterator<T> {    
     _fail(count < 0, 'Count cannot be negative.');
      
     let taken = 0;
@@ -75,6 +73,8 @@ export function* take<T>(iter: IterableIterator<T>, count: number): IterableIter
     for (const item of iter) {
         if (taken++ < count) {
             yield item;
+        } else {
+            break;
         }
     }
 }
@@ -83,9 +83,9 @@ export function* takeWhile<T>(iter: IterableIterator<T>, predicate: PredicateFun
     let i = 0;
     
     for (const item of iter) {
-        if (!predicate(item, i += 1)) { break; }
-         
         yield item;
+         
+        if (!predicate(item, i += 1)) { break; }
     }
 }
 
@@ -113,9 +113,10 @@ export function* skipWhile<T>(iter: IterableIterator<T>, predicate: PredicateFun
     yield* iter;
 }
 
-export function* chain<T>(iter: IterableIterator<T>, other: IterableIterator<T>): IterableIterator<T> {
-    yield* iter;
-    yield* other;
+export function* chain<T>(...others: IterableIterator<T>[]): IterableIterator<T> {
+    for (let i = 0; i < others.length; i++) {
+        yield* others[i];
+    }
 }
 
 export function some<T>(iter: IterableIterator<T>, predicate?: PredicateFunction<T>): boolean {
@@ -264,19 +265,3 @@ export function count<T>(iter: IterableIterator<T>, predicate?: PredicateFunctio
     
     return c;
 }
-
-function _<T>(arr: T[]): IterableIterator<T> {
-    return arr[Symbol.iterator]();
-}
-
-function $<T>(iter: IterableIterator<T>): T[] {
-    const arr = [];
-    
-    for (const item of iter) {
-        arr.push(item);
-    }
-    
-    return arr;
-}
-
-console.log($(skipWhile(_([1,2,3,4,5]), n => n < 2)))
