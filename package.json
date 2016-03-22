@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "babel-node": "babel-node --presets=es2015",
-    "watch": "nodemon --es_staging --harmony_rest_parameters index.js"
+    "watch": "nodemon --es_staging --harmony_rest_parameters dist/index.js"
   },
   "repository": {
     "type": "git",

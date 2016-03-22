@@ -35,6 +35,7 @@ export function* range(start: number, count?: number): IterableIterator<number> 
         
         while (true) {
             yield start + i;
+            i++;
         }
     }
 }
@@ -224,11 +225,7 @@ export function first<T>(iter: IterableIterator<T>, predicate?: PredicateFunctio
 
 export function last<T>(iter: IterableIterator<T>, predicate?: PredicateFunction<T>): T {
     if (typeof predicate === 'undefined') {
-        const iterResult = iter.next();
-        
-        _fail(true, 'Sequence contains no elements.');
-        
-        return iterResult.value;
+        predicate = _truthyPredicate;
     }
     
     let i = 0;
