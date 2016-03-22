@@ -1,6 +1,43 @@
 import * as impl from '../impl';
 import { assert } from 'chai';
 
+describe('repeat', () => {
+    it('throws an error if count is negative', () => {
+        assert.throws(() => impl.repeat('should throw', -1));
+    });
+
+    it('returns N items when N > 0', () => {
+        assert.lengthOf([...impl.repeat('hi', 5)], 5);
+    });
+
+    it('returns empty when N === 0', () => {
+        assert.lengthOf([...impl.repeat('none', 0)], 0);
+    });
+
+    it('always returns the same item', () => {
+        const items = [...impl.repeat({ hi: 'hello' }, 10)];
+
+        const first = items[0];
+
+        assert.isTrue(items.every(i => i === first));
+    });
+});
+
+describe('range', () => {
+    it('throws on a negative count', () => {
+        assert.throws(() => impl.range(1, -1));
+    });
+
+    it('returns C numbers between S and (S + C) - 1', () => {
+        const result = [...impl.range(1, 10)];
+
+        assert.lengthOf(result, 10);
+
+        assert.equal(result[0], 1);
+        assert.equal(result[result.length - 1], 10);
+    });
+});
+
 describe('map', () => {
 
     it('transforms an array of numbers', () => {
@@ -44,12 +81,20 @@ describe('flatten', () => {
 
         assert.deepEqual(actual, expected);
     });
+
+    it('doesn\'t recursively flatten nested iterables', () => {
+        const original = [{ arr: [1, [2], 3] }, { arr: [4, 5, 6] }];
+        const expected = [1, [2], 3, 4, 5, 6];
+        const actual = [...impl.flatten(original, n => n.arr)];
+
+        assert.deepEqual(actual, expected);
+    });
 });
 
 describe('filter', () => {
-    it('removes items based on a predicate', () => {
-        const original = [1, 2, 3];
-        const expected = [2];
+    it('returns items based on a predicate', () => {
+        const original = [1, 2, 3, 4];
+        const expected = [2, 4];
         const actual = [...impl.filter(original, n => n % 2 === 0)];
 
         assert.deepEqual(actual, expected);
@@ -57,6 +102,10 @@ describe('filter', () => {
 });
 
 describe('take', () => {
+    it('throws if count is negative', () => {
+        assert.throws(() => impl.take([], -1));
+    });
+
     it('takes N items if source is of N length', () => {
         const original = [1, 2, 3];
         const expected = 3;
@@ -115,6 +164,18 @@ describe('chain', () => {
         const iter3 = [4, 5, 6];
 
         const expected = [1, 2, 3, 3, 2, 1, 4, 5, 6];
+
+        const actual = [...impl.chain(iter1, iter2, iter3)];
+
+        assert.deepEqual(expected, actual);
+    });
+
+    it('doesn\'t alter the contents of nested iterables', () => {
+        const iter1 = [1, 2, 3];
+        const iter2 = [3, [2], 1];
+        const iter3 = [4, 5, 6];
+
+        const expected = [1, 2, 3, 3, [2], 1, 4, 5, 6];
 
         const actual = [...impl.chain(iter1, iter2, iter3)];
 

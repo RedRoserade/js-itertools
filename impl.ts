@@ -7,40 +7,50 @@ import {
 
 function _truthyPredicate(item) { return true; }
 
-function _fail(cond, msg) { if (cond) {throw new TypeError(msg); } }
+function _fail(cond, msg) { if (cond) { throw new TypeError(msg); } }
 
 function* _coerceToIterator<T>(source: Iterable<T>) {
     yield* source;
 }
 
-export function* repeat<T>(item: T, count?: number): IterableIterator<T> {
+export function repeat<T>(item: T, count?: number): IterableIterator<T> {
     if (typeof count === 'number') {
+
         _fail(count < 0, 'Count cannot be negative.');
 
-        for (let i = 0; i < count; i++) {
-            yield item;
-        }
+        return (function* repeat() {
+            for (let i = 0; i < count; i++) {
+                yield item;
+            }
+        }());
+
     } else {
-        while (true) {
-            yield item;
-        }
+        return (function* repeatInfinite() {
+            while (true) {
+                yield item;
+            }
+        }());
     }
 }
 
-export function* range(start: number, count?: number): IterableIterator<number> {
+export function range(start: number, count?: number): IterableIterator<number> {
     if (typeof count === 'number') {
         _fail(count < 0, 'Count cannot be negative.');
 
-        for (let i = 0; i < count; i++) {
-            yield start + i;
-        }
+        return (function* range() {
+            for (let i = 0; i < count; i++) {
+                yield start + i;
+            }
+        }());
     } else {
-        let i = 0;
+        return (function* rangeInfinite() {
+            let i = 0;
 
-        while (true) {
-            yield start + i;
-            i++;
-        }
+            while (true) {
+                yield start + i;
+                i++;
+            }
+        }());
     }
 }
 
@@ -70,18 +80,20 @@ export function* filter<T>(iter: Iterable<T>, fn: PredicateFunction<T>): Iterabl
     }
 }
 
-export function* take<T>(iter: Iterable<T>, count: number): IterableIterator<T> {
+export function take<T>(iter: Iterable<T>, count: number): IterableIterator<T> {
     _fail(count < 0, 'Count cannot be negative.');
 
-    let taken = 0;
+    return (function* take() {
+        let taken = 0;
 
-    for (const item of iter) {
-        if (taken++ < count) {
-            yield item;
-        } else {
-            break;
+        for (const item of iter) {
+            if (taken++ < count) {
+                yield item;
+            } else {
+                break;
+            }
         }
-    }
+    }());
 }
 
 export function* takeWhile<T>(iter: Iterable<T>, predicate: PredicateFunction<T>): IterableIterator<T> {
@@ -125,7 +137,7 @@ export function* chain<T>(...others: Iterable<T>[]): IterableIterator<T> {
 
 export function some<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): boolean {
 
-    let iter = _coerceToIterator(source);
+    const iter = _coerceToIterator(source);
 
     if (typeof predicate !== 'function') {
         const iterResult = iter.next();
