@@ -9,6 +9,10 @@ function _truthyPredicate(item) { return true; }
 
 function _fail(cond, msg) { if (cond) {throw new TypeError(msg); } }
 
+function* _coerceToIterator<T>(source: Iterable<T>) {
+    yield* source;
+}
+
 export function* repeat<T>(item: T, count?: number): IterableIterator<T> {
     if (typeof count === 'number') {
         _fail(count < 0, 'Count cannot be negative.');
@@ -89,7 +93,7 @@ export function* takeWhile<T>(iter: Iterable<T>, predicate: PredicateFunction<T>
     }
 }
 
-export function* skip<T>(iter: IterableIterator<T>, count: number): IterableIterator<T> {
+export function* skip<T>(iter: Iterable<T>, count: number): IterableIterator<T> {
     _fail(count < 0, 'Count cannot be negative.');
 
     let skipped = 0;
@@ -101,7 +105,7 @@ export function* skip<T>(iter: IterableIterator<T>, count: number): IterableIter
     }
 }
 
-export function* skipWhile<T>(iter: IterableIterator<T>, predicate: PredicateFunction<T>): IterableIterator<T> {
+export function* skipWhile<T>(iter: Iterable<T>, predicate: PredicateFunction<T>): IterableIterator<T> {
     let i = 0;
 
     for (const item of iter) {
@@ -113,22 +117,20 @@ export function* skipWhile<T>(iter: IterableIterator<T>, predicate: PredicateFun
     yield* iter;
 }
 
-export function* chain<T>(...others: IterableIterator<T>[]): IterableIterator<T> {
+export function* chain<T>(...others: Iterable<T>[]): IterableIterator<T> {
     for (let i = 0; i < others.length; i++) {
         yield* others[i];
     }
 }
 
-export function some<T>(iter: IterableIterator<T>, predicate?: PredicateFunction<T>): boolean {
+export function some<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): boolean {
 
-    const iterResult = iter.next();
-
-    if (iterResult.done) {
-        return true;
-    }
+    let iter = _coerceToIterator(source);
 
     if (typeof predicate !== 'function') {
-        predicate = _truthyPredicate;
+        const iterResult = iter.next();
+
+        return !iterResult.done;
     }
 
     let i = 0;
@@ -140,7 +142,7 @@ export function some<T>(iter: IterableIterator<T>, predicate?: PredicateFunction
     return false;
 }
 
-export function every<T>(iter: IterableIterator<T>, predicate: PredicateFunction<T>): boolean {
+export function every<T>(iter: Iterable<T>, predicate: PredicateFunction<T>): boolean {
     let i = 0;
 
     for (const item of iter) {
@@ -152,7 +154,7 @@ export function every<T>(iter: IterableIterator<T>, predicate: PredicateFunction
 
 
 
-export function includes<T>(iter: IterableIterator<T>, test: T): boolean {
+export function includes<T>(iter: Iterable<T>, test: T): boolean {
     for (const item of iter) {
         if (Object.is(item, test)) {
             return true;
@@ -162,8 +164,10 @@ export function includes<T>(iter: IterableIterator<T>, test: T): boolean {
     return false;
 }
 
-export function reduce<T, U>(iter: IterableIterator<T>, fn: ReducerFunction<T, U>, initialValue?: U): U {
+export function reduce<T, U>(source: Iterable<T>, fn: ReducerFunction<T, U>, initialValue?: U): U {
     let currentValue: any;
+
+    let iter = _coerceToIterator(source);
 
     const iterResult = iter.next();
 
@@ -188,7 +192,9 @@ export function reduce<T, U>(iter: IterableIterator<T>, fn: ReducerFunction<T, U
     return currentValue;
 }
 
-export function single<T>(iter: IterableIterator<T>, orElse?: UnitFunction<T>): T {
+export function single<T>(source: Iterable<T>, orElse?: UnitFunction<T>): T {
+    const iter = _coerceToIterator(source);
+
     const iterResult = iter.next();
 
     if (iterResult.done) {
@@ -202,7 +208,9 @@ export function single<T>(iter: IterableIterator<T>, orElse?: UnitFunction<T>): 
     return iterResult.value;
 }
 
-export function first<T>(iter: IterableIterator<T>, predicate?: PredicateFunction<T>): T {
+export function first<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): T {
+    const iter = _coerceToIterator(source);
+
     if (typeof predicate === 'undefined') {
         const iterResult = iter.next();
 
@@ -222,7 +230,7 @@ export function first<T>(iter: IterableIterator<T>, predicate?: PredicateFunctio
     _fail(true, 'Sequence contains no matching elements.');
 }
 
-export function last<T>(iter: IterableIterator<T>, predicate?: PredicateFunction<T>): T {
+export function last<T>(iter: Iterable<T>, predicate?: PredicateFunction<T>): T {
     if (typeof predicate === 'undefined') {
         predicate = _truthyPredicate;
     }
@@ -242,7 +250,7 @@ export function last<T>(iter: IterableIterator<T>, predicate?: PredicateFunction
     return match;
 }
 
-export function count<T>(iter: IterableIterator<T>, predicate?: PredicateFunction<T>): number {
+export function count<T>(iter: Iterable<T>, predicate?: PredicateFunction<T>): number {
     let c = 0;
 
     if (typeof predicate === 'function') {
