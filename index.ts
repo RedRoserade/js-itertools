@@ -31,13 +31,13 @@ interface Enumerable<T> {
 
 function iterable<T>(items: IterableIterator<T> | Iterable<T> | Iterator<T>): Enumerable<T> {
     let _items: IterableIterator<T>;
-    
+
     if (typeof items[Symbol.iterator] === 'function') {
         _items = items[Symbol.iterator]();
     }
-        
+
     return {
-        [Symbol.iterator]: _items[Symbol.iterator].bind(items),
+        [Symbol.iterator]: () => _items,
         map: (fn) => iterable(impl.map(_items, fn)),
         flatten: (fn) => iterable(impl.flatten(_items, fn)),
         filter: (fn) => iterable(impl.filter(_items, fn)),
@@ -56,15 +56,10 @@ function iterable<T>(items: IterableIterator<T> | Iterable<T> | Iterator<T>): En
         count: (fn?) => impl.count(_items, fn)
     };
 }
+
 module iterable {
     export function repeat<T>(item: T, count?: number) { return iterable(impl.repeat(item, count)); }
     export function range(start: number, count?: number) { return iterable(impl.range(start, count)); }
 }
 
 export default iterable;
-
-const result = iterable.range(2)
-    .take(50)
-    .last();
-
-console.log(result);
