@@ -107,3 +107,62 @@ describe('takeWhile', () => {
         assert.deepEqual(actual, expected);
     });
 });
+
+describe('chain', () => {
+    it('takes the iterables and puts them all in the order they were put in the arguments', () => {
+        const iter1 = [1, 2, 3];
+        const iter2 = [3, 2, 1];
+        const iter3 = [4, 5, 6];
+
+        const expected = [1, 2, 3, 3, 2, 1, 4, 5, 6];
+
+        const actual = [...impl.chain(iter1, iter2, iter3)];
+
+        assert.deepEqual(expected, actual);
+    });
+});
+
+describe('some', () => {
+    it('returns true if at least one item matches', () => {
+        const original = [1, 2, 3];
+        const actual = impl.some(original, n => n % 2 === 0);
+
+        assert.isTrue(actual);
+    });
+
+    it('returns false if no item matches', () => {
+        const original = [1, 2, 3];
+        const actual = impl.some(original, n => n === 0);
+
+        assert.isFalse(actual);
+    });
+
+    it('returns true if at least one item is matched in an infinite sequence', () => {
+        const original = impl.repeat(10);
+
+        assert.isTrue(impl.some(original, n => n === 10));
+    });
+
+    it('doesn\'t iterate over a sequence more times than it needs to', () => {
+        function* infiniteCounter() {
+            let c = 0;
+            while (true) {
+                assert.isBelow(c, 6, 'Iterated more than 5 times.');
+
+                yield c++;
+            }
+        }
+
+        assert.isTrue(impl.some(infiniteCounter(), n => n === 5));
+    });
+
+    it('returns true if no predicate is passed and the sequence is not empty', () => {
+        assert.isTrue(impl.some([1]));
+        assert.isTrue(impl.some(impl.repeat('hi', 1)));
+    });
+
+    it('returns false if no predicate is passed and the sequence is empty', () => {
+        assert.isFalse(impl.some([]));
+        assert.isFalse(impl.some(impl.repeat('hi', 0)));
+    });
+});
