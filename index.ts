@@ -22,7 +22,7 @@ interface Enumerable<T> {
     every(fn: PredicateFunction<T>): boolean;
     includes(item: T): boolean;
     reduce<U>(fn: ReducerFunction<T, U>, defaultValue?: U): U;
-    single(orElse?: UnitFunction<T>): T;
+    single(orElse?: PredicateFunction<T>): T;
     first(fn?: PredicateFunction<T>): T;
     last(fn?: PredicateFunction<T>): T;
     count(fn?: PredicateFunction<T>): number;

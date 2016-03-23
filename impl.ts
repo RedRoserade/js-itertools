@@ -44,11 +44,8 @@ export function range(start: number, count?: number): IterableIterator<number> {
         }());
     } else {
         return (function* rangeInfinite() {
-            let i = 0;
-
-            while (true) {
+            for (let i = 0; ; i++) {
                 yield start + i;
-                i++;
             }
         }());
     }
@@ -119,14 +116,16 @@ export function* skip<T>(iter: Iterable<T>, count: number): IterableIterator<T> 
 
 export function* skipWhile<T>(iter: Iterable<T>, predicate: PredicateFunction<T>): IterableIterator<T> {
     let i = 0;
+    let nonMatchFound = false;
 
     for (const item of iter) {
-        if (predicate(item, i += 1)) { continue; }
+        if (!nonMatchFound) {
+            if (predicate(item, i += 1)) { continue; }
+            nonMatchFound = true;
+        }
 
-        break;
+        yield item;
     }
-
-    yield* iter;
 }
 
 export function* chain<T>(...others: Iterable<T>[]): IterableIterator<T> {
@@ -140,9 +139,7 @@ export function some<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): 
     const iter = _coerceToIterator(source);
 
     if (typeof predicate !== 'function') {
-        const iterResult = iter.next();
-
-        return !iterResult.done;
+        predicate = _truthyPredicate;
     }
 
     let i = 0;
@@ -164,11 +161,9 @@ export function every<T>(iter: Iterable<T>, predicate: PredicateFunction<T>): bo
     return true;
 }
 
-
-
 export function includes<T>(iter: Iterable<T>, test: T): boolean {
     for (const item of iter) {
-        if (Object.is(item, test)) {
+        if (item === test) {
             return true;
         }
     }
@@ -204,33 +199,37 @@ export function reduce<T, U>(source: Iterable<T>, fn: ReducerFunction<T, U>, ini
     return currentValue;
 }
 
-export function single<T>(source: Iterable<T>, orElse?: UnitFunction<T>): T {
-    const iter = _coerceToIterator(source);
-
-    const iterResult = iter.next();
-
-    if (iterResult.done) {
-        _fail(typeof orElse !== 'function', 'Sequence contains no elements and orElse wasn\'t specified.');
-
-        return orElse();
+export function single<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): T {
+    if (typeof predicate === 'undefined') {
+        predicate = _truthyPredicate;
     }
 
-    _fail(!iter.next().done, 'Sequence contains more than one element.');
+    const iter = _coerceToIterator(source);
+    let itemAlreadyFound = false;
+    let foundItem: T;
+    let i = 0;
 
-    return iterResult.value;
+    for (const item of iter) {
+        _fail(itemAlreadyFound, 'Sequence contains more than one matching element.');
+        itemAlreadyFound = predicate(item, i++);
+
+        if (itemAlreadyFound) {
+            foundItem = item;
+        }
+    }
+
+    _fail(!itemAlreadyFound, 'Sequence contains no matching element.');
+
+    return foundItem;
 }
 
 export function first<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): T {
-    const iter = _coerceToIterator(source);
 
     if (typeof predicate === 'undefined') {
-        const iterResult = iter.next();
-
-        _fail(iterResult.done, 'Sequence contains no elements.');
-
-        return iterResult.value;
+        predicate = _truthyPredicate;
     }
 
+    const iter = _coerceToIterator(source);
     let i = 0;
 
     for (const item of iter) {
@@ -263,19 +262,18 @@ export function last<T>(iter: Iterable<T>, predicate?: PredicateFunction<T>): T 
 }
 
 export function count<T>(iter: Iterable<T>, predicate?: PredicateFunction<T>): number {
+
+    if (typeof predicate === 'undefined') {
+        predicate = _truthyPredicate;
+    }
+
     let c = 0;
 
-    if (typeof predicate === 'function') {
-        let i = 0;
+    let i = 0;
 
-        for (const item of iter) {
-            if (predicate(item, i++)) {
-                c++
-            }
-        }
-    } else {
-        for (const item of iter) {
-            c++;
+    for (const item of iter) {
+        if (predicate(item, i++)) {
+            c++
         }
     }
 

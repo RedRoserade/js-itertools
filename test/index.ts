@@ -157,6 +157,38 @@ describe('takeWhile', () => {
     });
 });
 
+describe('skip', () => {
+    it('skips the first N items', () => {
+        const original = [1, 2, 3, 4, 5];
+
+        assert.deepEqual([...impl.skip(original, 2)], [3, 4, 5]);
+    });
+
+    it('returns an empty sequence if N is larger than the number of items in the source', () => {
+        const original = [1, 2, 3, 4, 5];
+
+        assert.deepEqual([...impl.skip(original, 10)], []);
+    });
+});
+
+describe('skipWhile', () => {
+    it('skips items while a condition is true', () => {
+        const original = [1, 2, 3, 4, 5];
+        const expected = [4, 5];
+        const actual = [...impl.skipWhile(original, n => n <= 3)];
+
+        assert.deepEqual(actual, expected);
+    });
+
+    it('only skips the items up to the first that doesn\'t (exclusive), even if later items still match the condition', () => {
+        const original = [1, 2, 3, 4, 5, 4, 3, 2, 1];
+        const expected = [4, 5, 4, 3, 2, 1];
+        const actual = [...impl.skipWhile(original, n => n <= 3)];
+
+        assert.deepEqual(actual, expected);
+    });
+});
+
 describe('chain', () => {
     it('takes the iterables and puts them all in the order they were put in the arguments', () => {
         const iter1 = [1, 2, 3];
@@ -226,4 +258,91 @@ describe('some', () => {
         assert.isFalse(impl.some([]));
         assert.isFalse(impl.some(impl.repeat('hi', 0)));
     });
+});
+
+describe('every', () => {
+    it('returns false when one item doesn\'t match', () => {
+        assert.isFalse(impl.every([2, 4, 5], n => n % 2 === 0));
+    });
+
+    it('returns true if all items pass the predicate', () => {
+        assert.isTrue(impl.every([1, 2, 3, 4, 5], n => n < 10));
+    });
+
+    it('returns false on the first item that is found, even if the sequence is infinite', () => {
+        assert.isFalse(impl.every(impl.range(1), n => n < 10));
+    });
+});
+
+describe('includes', () => {
+    it('returns true if an item is in the list using === equality rules', () => {
+        assert.isTrue(impl.includes([1, 2, 3], 2));
+        assert.isFalse(impl.includes([1, '2', 3], 2));
+    });
+});
+
+describe('reduce', () => {
+    it('throws if an empty sequence and no default values are passed', () => {
+        assert.throws(() => impl.reduce([], (acc, v) => acc + v));
+    });
+
+    it('takes the first item in the sequence if no default value is passed', () => {
+        assert.equal(impl.reduce([1, 2, 3, 4, 5], (acc: number, v) => acc + v), 15);
+    });
+
+    it('uses the default value if passed', () => {
+        assert.equal(impl.reduce([1, 2, 3, 4, 5], (acc, v) => acc + v, 10), 25);
+    });
+});
+
+describe('single', () => {
+    it('throws if the sequence has more than one value and no predicate was passed.', () => {
+        assert.throws(() => impl.single([1, 2]));
+    });
+
+    it('returns the single item if it\'s the only item that matches', () => {
+        assert.equal(impl.single([1]), 1);
+    });
+
+    it('throws if more than one item matches a predicate', () => {
+        assert.throws(() => impl.single([1, 2], (i) => i < 3));
+    });
+});
+
+describe('first', () => {
+    it('throws if the sequence is empty an no predicate was passed.', () => {
+        assert.throws(() => impl.first([]));
+    });
+
+    it('returns the first item if no predicate was passed', () => {
+        assert.equal(impl.first([1, 2, 3]), 1);
+    })
+
+    it('returns the first item that does match, even if more exist', () => {
+        assert.equal(impl.first([1, 2, 4, 5], (i) => i % 2 === 0), 2);
+    });
+});
+
+describe('last', () => {
+    it('throws if the sequence is empty an no predicate was passed', () => {
+        assert.throws(() => impl.first([]));
+    });
+
+    it('returns the last item that does match, even if previous items matched', () => {
+        assert.equal(impl.last([1, 2, 4, 5], (i) => i % 2 === 0), 4);
+    });
+
+    it('returns the last item if no predicate was passed', () => {
+        assert.equal(impl.last([1, 2, 3]), 3);
+    })
+});
+
+describe('count', () => {
+    it('returns the number of items in the sequence when no predicate is passed', () => {
+        assert.equal(impl.count([1, 2, 3]), 3);
+    });
+
+    it('returns the number of items that match the predicate', () => {
+        assert.equal(impl.count([1, 2, 3, 4, 5], n => n % 2 === 0), 2);
+    })
 });
