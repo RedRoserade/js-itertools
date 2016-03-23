@@ -275,9 +275,17 @@ describe('every', () => {
 });
 
 describe('includes', () => {
-    it('returns true if an item is in the list using === equality rules', () => {
+    it('returns true if an item is in the list', () => {
         assert.isTrue(impl.includes([1, 2, 3], 2));
         assert.isFalse(impl.includes([1, '2', 3], 2));
+    });
+    
+    it('returns true for NaN', () => {
+        assert.isTrue(impl.includes([0, NaN], NaN));
+    });
+    
+    it('returns false of +0/-0', () => {
+        assert.isTrue(impl.includes([+0], -0));
     });
 });
 
