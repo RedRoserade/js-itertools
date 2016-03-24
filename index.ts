@@ -12,7 +12,7 @@ function iterable<T>(items: Iterable<T>): Enumerable<T> {
     return {
         [Symbol.iterator]: () => _items,
         map: (fn) => iterable(impl.map(_items, fn)),
-        flatten: (fn) => iterable(impl.flatten(_items, fn)),
+        flatMap: (fn) => iterable(impl.flatMap(_items, fn)),
         filter: (fn) => iterable(impl.filter(_items, fn)),
         take: (count) => iterable(impl.take(_items, count)),
         takeWhile: (fn) => iterable(impl.takeWhile(_items, fn)),
@@ -26,7 +26,8 @@ function iterable<T>(items: Iterable<T>): Enumerable<T> {
         single: (fn?) => impl.single(_items, fn),
         first: (fn?) => impl.first(_items, fn),
         last: (fn?) => impl.last(_items, fn),
-        count: (fn?) => impl.count(_items, fn)
+        count: (fn?) => impl.count(_items, fn),
+        transformWith: (fn, ...args) => iterable(fn(_items, ...args))
     };
 }
 

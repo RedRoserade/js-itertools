@@ -57,11 +57,11 @@ describe('map', () => {
     });
 });
 
-describe('flatten', () => {
+describe('flatMap', () => {
     it('flattens an array of arrays', () => {
         const original = [[1, 2, 3], [4, 5, 6]];
         const expected = [1, 2, 3, 4, 5, 6];
-        const actual = [...impl.flatten(original, n => n)];
+        const actual = [...impl.flatMap(original, n => n)];
 
         assert.deepEqual(actual, expected);
     });
@@ -69,7 +69,7 @@ describe('flatten', () => {
     it('flattens a string into its characters', () => {
         const original = 'hello';
         const expected = 'hello'.split('');
-        const actual = [...impl.flatten(original, n => n)];
+        const actual = [...impl.flatMap(original, n => n)];
 
         assert.deepEqual(expected, actual);
     });
@@ -77,7 +77,7 @@ describe('flatten', () => {
     it('retrieves the iterable property of objects and flattens it', () => {
         const original = [{ arr: [1, 2, 3] }, { arr: [4, 5, 6] }];
         const expected = [1, 2, 3, 4, 5, 6];
-        const actual = [...impl.flatten(original, n => n.arr)];
+        const actual = [...impl.flatMap(original, n => n.arr)];
 
         assert.deepEqual(actual, expected);
     });
@@ -85,7 +85,7 @@ describe('flatten', () => {
     it('doesn\'t recursively flatten nested iterables', () => {
         const original = [{ arr: [1, [2], 3] }, { arr: [4, 5, 6] }];
         const expected = [1, [2], 3, 4, 5, 6];
-        const actual = [...impl.flatten(original, n => n.arr)];
+        const actual = [...impl.flatMap(original, n => n.arr)];
 
         assert.deepEqual(actual, expected);
     });
@@ -279,11 +279,11 @@ describe('includes', () => {
         assert.isTrue(impl.includes([1, 2, 3], 2));
         assert.isFalse(impl.includes([1, '2', 3], 2));
     });
-    
+
     it('returns true for NaN', () => {
         assert.isTrue(impl.includes([0, NaN], NaN));
     });
-    
+
     it('returns false of +0/-0', () => {
         assert.isTrue(impl.includes([+0], -0));
     });

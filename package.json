@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha dist/test --recursive --watch --es_staging",
     "babel-node": "babel-node --presets=es2015",
-    "watch": "nodemon --es_staging --harmony_rest_parameters dist/index.js"
+    "watch": "nodemon --es_staging dist/index.js"
   },
   "repository": {
     "type": "git",

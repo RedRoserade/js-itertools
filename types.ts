@@ -9,7 +9,7 @@ export type ReducerFunction<T, U> = (accumulated: U, item: T) => U;
 export interface Enumerable<T> {
     [Symbol.iterator](): Iterator<T>;
     map<U>(fn: SelectorFunction<T, U>): Enumerable<U>;
-    flatten<U>(fn: SelectorFunction<T, Iterable<U>>): Enumerable<U>;
+    flatMap<U>(fn: SelectorFunction<T, Iterable<U>>): Enumerable<U>;
     filter(fn: PredicateFunction<T>): Enumerable<T>;
     take(count: number): Enumerable<T>;
     takeWhile(fn: PredicateFunction<T>): Enumerable<T>;
@@ -24,4 +24,5 @@ export interface Enumerable<T> {
     first(fn?: PredicateFunction<T>): T;
     last(fn?: PredicateFunction<T>): T;
     count(fn?: PredicateFunction<T>): number;
+    transformWith<U>(fn: (iterable: Iterable<T>, ...args: any[]) => Iterable<U>, ...args: any[]): Enumerable<U>;
 }

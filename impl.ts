@@ -14,10 +14,10 @@ function _fail(cond, msg) { if (cond) { throw new TypeError(msg); } }
 
 /**
  * Returns a generator that yields [item] [count] times.
- * 
+ *
  * If [count] is ommited, [item] will be returned an
  * infinite amount of times.
- * 
+ *
  * @param item: The item to repeatedly return.
  * @param count: The number of times to return the item. Optional. May not be negative, can be 0.
  */
@@ -43,7 +43,7 @@ export function repeat<T>(item: T, count?: number): IterableIterator<T> {
 
 /**
  * Returns a generator that yields numbers from [start] up to [start] + [count] - 1.
- * 
+ *
  * If count is ommitted, it goes on forever. Overflow testing is not done.
  */
 export function range(start: number, count?: number): IterableIterator<number> {
@@ -78,12 +78,12 @@ export function* map<T, U>(iter: Iterable<T>, fn: SelectorFunction<T, U>): Itera
 /**
  * Returns a generator whose items are the result of applying [fn] to each of the items in [iter],
  * and expanding them into one single sequence.
- * 
+ *
  * [fn] must return an iterable.
- * 
+ *
  * flatten([[1], [2], [3]], n => n) === [1, 2, 3]
  */
-export function* flatten<T, U>(iter: Iterable<T>, fn: SelectorFunction<T, Iterable<U>>): IterableIterator<U> {
+export function* flatMap<T, U>(iter: Iterable<T>, fn: SelectorFunction<T, Iterable<U>>): IterableIterator<U> {
     let i = 0;
 
     for (const item of iter) {
@@ -106,7 +106,7 @@ export function* filter<T>(iter: Iterable<T>, fn: PredicateFunction<T>): Iterabl
 
 /**
  * Returns a generator that returns up to [count] items from [iter].
- * 
+ *
  * If [iter] has *less* items than [count], then all the items from [iter] are returned.
  */
 export function take<T>(iter: Iterable<T>, count: number): IterableIterator<T> {
@@ -119,7 +119,7 @@ export function take<T>(iter: Iterable<T>, count: number): IterableIterator<T> {
             if (taken++ < count) {
                 yield item;
             } else {
-                break;
+                return;
             }
         }
     }());
@@ -128,9 +128,9 @@ export function take<T>(iter: Iterable<T>, count: number): IterableIterator<T> {
 /**
  * Returns a generator that returns items from [iter] until [predicate] returns false. Iteration
  * will stop as soon as the first non-match is found.
- * 
+ *
  * The first item for which [predicate] returns false will *not* be returned.
- * 
+ *
  * Unlike [filter], even if later items would pass [predicate], they will not be returned.
  */
 export function* takeWhile<T>(iter: Iterable<T>, predicate: PredicateFunction<T>): IterableIterator<T> {
@@ -144,7 +144,7 @@ export function* takeWhile<T>(iter: Iterable<T>, predicate: PredicateFunction<T>
 
 /**
  * Returns a generator whose items are those from [iter], except the first [count].
- * 
+ *
  * If [count] is larger than the number of items in [iter], the resulting generator
  * will be empty.
  */
@@ -162,7 +162,7 @@ export function* skip<T>(iter: Iterable<T>, count: number): IterableIterator<T> 
 
 /**
  * Returns a generator whose items are those from [iter], except the first ones whose [predicate] returns true.
- * 
+ *
  * The first item in the resulting generator will be, thus, the first item for which [predicate] returns false.
  */
 export function* skipWhile<T>(iter: Iterable<T>, predicate: PredicateFunction<T>): IterableIterator<T> {
@@ -191,10 +191,10 @@ export function* chain<T>(...others: Iterable<T>[]): IterableIterator<T> {
 
 /**
  * Tests whether the [source] has at least one item which matches [predicate].
- * 
+ *
  * Iteration stops as soon as the match is found (if any). False will only be returned
  * if the [source] is exhausted.
- * 
+ *
  * Note: Unlike [Array.prototype.some], [predicate] is optional. In this case, it'll be
  * tested whether the [source] has any items.
  */
@@ -217,7 +217,7 @@ export function some<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): 
 
 /**
  * Tests if *all* the items in [iter] pass the [predicate] function.
- * 
+ *
  * Iteration stops as soon as a non-match is found.
  */
 export function every<T>(iter: Iterable<T>, predicate: PredicateFunction<T>): boolean {
@@ -232,7 +232,7 @@ export function every<T>(iter: Iterable<T>, predicate: PredicateFunction<T>): bo
 
 /**
  * Tests whether [iter] contains [test], using the same semantics as [Array.prototype.includes].
- * 
+ *
  * Iteration stops as soon as the first match is found. False is returned otherwise.
  */
 export function includes<T>(iter: Iterable<T>, test: T): boolean {
@@ -249,12 +249,12 @@ export function includes<T>(iter: Iterable<T>, test: T): boolean {
 
 /**
  * Reduces [source] to a single value by applying [fn] to each item in [source].
- * 
+ *
  * The [initialValue] is optional, and can be used to initialize the [accumulator] variable
  * on the first iteration. Otherwise, the first item in [source] is used.
- * 
+ *
  * If the source is empty and no [initialValue] is supplied, an error is thrown.
- * 
+ *
  * Otherwise, the [initialValue] is returned without applying [fn] to it.
  */
 export function reduce<T, U>(source: Iterable<T>, fn: ReducerFunction<T, U>, initialValue?: U): U {
@@ -287,9 +287,9 @@ export function reduce<T, U>(source: Iterable<T>, fn: ReducerFunction<T, U>, ini
 
 /**
  * Returns the single item present in [source] that matches the [predicate].
- * 
+ *
  * If [predicate] is absent, the sole item is returned.
- * 
+ *
  * This method will throw if the sequence is empty or contains more than one elements
  * that match [predicate], or if the sequence contains more than one item (when [predicate] is not present).
  */
@@ -320,7 +320,7 @@ export function single<T>(source: Iterable<T>, predicate?: PredicateFunction<T>)
 /**
  * Returns the first item in [source] that matches [predicate]. Iteration stops
  * as soon as the item is found.
- * 
+ *
  * If no item matches and the sequence is exhausted, an error is thrown.
  */
 export function first<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): T {
@@ -344,7 +344,7 @@ export function first<T>(source: Iterable<T>, predicate?: PredicateFunction<T>):
 /**
  * Returns the last item in [iter] that matches [predicate]. This will consume
  * the whole iterable.
- * 
+ *
  * If no item matches and the sequence is exhausted, an error is thrown.
  */
 export function last<T>(iter: Iterable<T>, predicate?: PredicateFunction<T>): T {
@@ -369,7 +369,7 @@ export function last<T>(iter: Iterable<T>, predicate?: PredicateFunction<T>): T 
 
 /**
  * Returns the number of items in [iter] that match [predicate] (if present).
- * 
+ *
  * If [predicate] is absent, it simply returns the number of items in [iter].
  */
 export function count<T>(iter: Iterable<T>, predicate?: PredicateFunction<T>): number {
@@ -389,4 +389,27 @@ export function count<T>(iter: Iterable<T>, predicate?: PredicateFunction<T>): n
     }
 
     return c;
+}
+
+export function zip<T1, T2>(iter1: Iterable<T1>, iter2: Iterable<T2>): Iterable<{ [0]: T1, [1]: T2 }>;
+export function zip<T1, T2, T3>(iter1: Iterable<T1>, iter2: Iterable<T2>, iter3: Iterable<T3>): Iterable<{ [0]: T1, [1]: T2, [2]: T3 }>;
+export function zip(...iterables: Iterable<any>[]):  Iterable<{ [index: number]: any }>;
+export function* zip(...iterables: Iterable<any>[]): Iterable<{ [index: number]: any }> {
+    const _iterables = iterables.map(coerceToIterator);
+    const iterableLength = _iterables.length
+
+    while (true) {
+        const item = [];
+
+        for (let i = 0; i < iterableLength; i++) {
+            const result = _iterables[i].next();
+
+            if (result.done) { return; }
+
+            item.push(result.value);
+        }
+
+        yield item;
+
+    }
 }
