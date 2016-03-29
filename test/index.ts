@@ -310,10 +310,13 @@ describe('single', () => {
 
     it('returns the single item if it\'s the only item that matches', () => {
         assert.equal(impl.single([1]), 1);
+        assert.equal(impl.single([1, 2, 3], i => i === 1), 1);
     });
 
     it('throws if more than one item matches a predicate', () => {
         assert.throws(() => impl.single([1, 2], (i) => i < 3));
+        
+        assert.throws(() => impl.single([1, 2, 1], (i) => i === 1));
     });
 });
 
@@ -353,4 +356,27 @@ describe('count', () => {
     it('returns the number of items that match the predicate', () => {
         assert.equal(impl.count([1, 2, 3, 4, 5], n => n % 2 === 0), 2);
     })
+});
+
+describe('zip', () => {
+    it('returns an iterable of arrays of N length', () => {
+        const iter1 = [1, 2, 3];
+        const iter2 = ['a', 'b', 'c'];
+        
+        const result = [...impl.zip(iter1, iter2)];
+        
+        assert.deepEqual([[1, 'a'], [2, 'b'], [3, 'c']], result);
+    });
+    
+    it('stops yielding items if one of the iterables is shorter', () => {
+        assert.deepEqual(
+            [...impl.zip([1, 2, 3], ['a', 'b'])],
+            [[1, 'a'], [2, 'b']]
+        );
+        
+        assert.deepEqual(
+            [...impl.zip([1, 2], ['a', 'b', 'c'])],
+            [[1, 'a'], [2, 'b']]
+        );
+    });
 });

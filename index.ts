@@ -2,12 +2,12 @@
 
 import * as impl from './impl';
 
-import { coerceToIterator } from './util';
+import { iterate } from './util';
 
-import { Enumerable } from './types';
+import { ChainableIterable } from './types';
 
-function iterable<T>(items: Iterable<T>): Enumerable<T> {
-    let _items = coerceToIterator(items);
+function iterable<T>(items: Iterable<T>): ChainableIterable<T> {
+    let _items = iterate(items);
 
     return {
         [Symbol.iterator]: () => _items,
@@ -18,7 +18,7 @@ function iterable<T>(items: Iterable<T>): Enumerable<T> {
         takeWhile: (fn) => iterable(impl.takeWhile(_items, fn)),
         skip: (count) => iterable(impl.skip(_items, count)),
         skipWhile: (fn) => iterable(impl.skipWhile(_items, fn)),
-        chain: (...iterables) => iterable(impl.chain(...[_items, ...iterables])),
+        chain: (...iterables) => iterable(impl.chain(_items, ...iterables)),
         some: (fn?) => impl.some(_items, fn),
         every: (fn) => impl.every(_items, fn),
         includes: (item) => impl.includes(_items, item),
@@ -27,9 +27,13 @@ function iterable<T>(items: Iterable<T>): Enumerable<T> {
         first: (fn?) => impl.first(_items, fn),
         last: (fn?) => impl.last(_items, fn),
         count: (fn?) => impl.count(_items, fn),
-        transformWith: (fn, ...args) => iterable(fn(_items, ...args))
+        transformWith: (fn, ...args) => iterable(fn(_items, ...args)),
+        zip: (...iterables) => iterable(impl.zip(_items, ...iterables)),
+        groupBy: (fn) => iterable(impl.groupBy(_items, fn)),
+        sortedGroupBy: (fn) => iterable(impl.sortedGroupBy(_items, fn))
     };
 }
+module.exports = iterable;
 
 export function repeat<T>(item: T, count?: number) { return iterable(impl.repeat(item, count)); }
 export function range(start: number, count?: number) { return iterable(impl.range(start, count)); }

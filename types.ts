@@ -6,16 +6,20 @@ export type UnitFunction<T> = () => T;
 
 export type ReducerFunction<T, U> = (accumulated: U, item: T) => U;
 
-export interface Enumerable<T> {
+export type KeyFunction<T, K> = (item: T) => K;
+
+export type Grouping<K, T> = { key: K, [Symbol.iterator](): Iterator<T> };
+
+export interface ChainableIterable<T> {
     [Symbol.iterator](): Iterator<T>;
-    map<U>(fn: SelectorFunction<T, U>): Enumerable<U>;
-    flatMap<U>(fn: SelectorFunction<T, Iterable<U>>): Enumerable<U>;
-    filter(fn: PredicateFunction<T>): Enumerable<T>;
-    take(count: number): Enumerable<T>;
-    takeWhile(fn: PredicateFunction<T>): Enumerable<T>;
-    skip(count: number): Enumerable<T>;
-    skipWhile(fn: PredicateFunction<T>): Enumerable<T>;
-    chain(...others: Iterable<T>[]): Enumerable<T>;
+    map<U>(fn: SelectorFunction<T, U>): ChainableIterable<U>;
+    flatMap<U>(fn: SelectorFunction<T, Iterable<U>>): ChainableIterable<U>;
+    filter(fn: PredicateFunction<T>): ChainableIterable<T>;
+    take(count: number): ChainableIterable<T>;
+    takeWhile(fn: PredicateFunction<T>): ChainableIterable<T>;
+    skip(count: number): ChainableIterable<T>;
+    skipWhile(fn: PredicateFunction<T>): ChainableIterable<T>;
+    chain(...others: Iterable<T>[]): ChainableIterable<T>;
     some(fn?: PredicateFunction<T>): boolean;
     every(fn: PredicateFunction<T>): boolean;
     includes(item: T): boolean;
@@ -24,5 +28,8 @@ export interface Enumerable<T> {
     first(fn?: PredicateFunction<T>): T;
     last(fn?: PredicateFunction<T>): T;
     count(fn?: PredicateFunction<T>): number;
-    transformWith<U>(fn: (iterable: Iterable<T>, ...args: any[]) => Iterable<U>, ...args: any[]): Enumerable<U>;
+    transformWith<U>(fn: (iterable: Iterable<T>, ...args: any[]) => Iterable<U>, ...args: any[]): ChainableIterable<U>;
+    zip(...iterables: Iterable<any>[]): ChainableIterable<Array<any>>;
+    groupBy<K>(keySelector: KeyFunction<K, T>): ChainableIterable<Grouping<K, T>>;
+    sortedGroupBy<K>(keySelector: KeyFunction<K, T>): ChainableIterable<Grouping<K, T>>;
 }

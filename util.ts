@@ -1,3 +1,3 @@
-export function* coerceToIterator<T>(source: Iterable<T>) {
+export function* iterate<T>(source: Iterable<T>) {
     yield* source;
 }
