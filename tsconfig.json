@@ -5,7 +5,8 @@
         "module": "commonjs",
         "sourceMap": true,
         "moduleResolution": "node",
-        "outDir": "dist"
+        "outDir": "dist",
+        "declaration": true
     },
     "exclude": [
         "typings/browser.d.ts",

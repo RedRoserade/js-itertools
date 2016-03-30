@@ -1,4 +1,4 @@
-import * as impl from '../impl';
+import * as impl from '../src/impl';
 import { assert } from 'chai';
 
 describe('repeat', () => {
