@@ -516,20 +516,6 @@ export function forEach<T>(iter: Iterable<T>, fn: Action<T>) {
 }
 
 /**
- * Calls [Array.from] with [iter].
- */
-export function toArray<T>(iter: Iterable<T>): Array<T> {
-    return Array.from(iter);
-}
-
-/**
- * Calls the [Set] constructor with [iter].
- */
-export function toSet<T>(iter: Iterable<T>): Set<T> {
-    return new Set(iter);
-}
-
-/**
  * Constructs a new Map using [iter], a function to extract the key
  * from each item, and anoter to extract the key's corresponding value.
  */

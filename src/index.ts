@@ -32,8 +32,8 @@ function iterable<T>(items: Iterable<T>): ChainableIterable<T> {
         groupBy: (fn) => iterable(impl.groupBy(_items, fn)),
         sortedGroupBy: (fn) => iterable(impl.sortedGroupBy(_items, fn)),
         forEach: (fn) => impl.forEach(_items, fn),
-        toArray: () => impl.toArray(_items),
-        toSet: () => impl.toSet(_items),
+        toArray: () => Array.from(_items),
+        toSet: () => new Set(_items),
         toMap: (k, v) => impl.toMap(_items, k, v)
     };
 }
