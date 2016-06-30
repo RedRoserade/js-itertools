@@ -23,6 +23,7 @@ export interface ChainableIterable<T> {
     skipWhile(fn: PredicateFunction<T>): ChainableIterable<T>;
     chain(...others: Iterable<T>[]): ChainableIterable<T>;
     some(fn?: PredicateFunction<T>): boolean;
+    none(fn?: PredicateFunction<T>): boolean;
     every(fn: PredicateFunction<T>): boolean;
     includes(item: T): boolean;
     reduce<U>(fn: ReducerFunction<T, U>, defaultValue?: U): U;
@@ -37,5 +38,5 @@ export interface ChainableIterable<T> {
     forEach(fn: Action<T>): void;
     toArray(): Array<T>;
     toSet(): Set<T>;
-    toMap<K, V>(keySelector: KeyFunction<T, K>, valueSelector: KeyFunction<T, V>): Map<K, V>;   
+    toMap<K, V>(keySelector: KeyFunction<T, K>, valueSelector: KeyFunction<T, V>): Map<K, V>;
 };

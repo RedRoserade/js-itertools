@@ -68,6 +68,23 @@ export function range(start: number, count?: number): IterableIterator<number> {
 }
 
 /**
+ * Returns a generator that yields numbers from [start] to [end] - 1, or [end] if [inclusive] === true
+ */
+export function between(start: number, end: number, inclusive?: boolean): IterableIterator<number> {
+    _fail(end < start, 'End cannot be lower than start.');
+
+    if (inclusive === true) {
+        end += 1;
+    }
+
+    return (function* between() {
+        for (let i = start; i < end; i++) {
+            yield i;
+        }
+    }());
+}
+
+/**
  * Returns a generator whose items are the result of applying [fn] to each of the items in [iter].
  */
 export function* map<T, U>(iter: Iterable<T>, fn: SelectorFunction<T, U>): IterableIterator<U> {
@@ -88,7 +105,7 @@ export function* map<T, U>(iter: Iterable<T>, fn: SelectorFunction<T, U>): Itera
  */
 export function* flatMap<T, U>(iter: Iterable<T>, fn?: SelectorFunction<T, Iterable<U>>): IterableIterator<U> {
     let i = 0;
-    
+
     if (typeof fn !== 'function') {
         fn = n => n as any;
     }
@@ -220,6 +237,29 @@ export function some<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): 
     }
 
     return false;
+}
+
+/**
+ * Returns true if [source] contains no matching element.
+ *
+ * If [predicate] is ommited, this returns whether [source] contains any item.
+ *
+ * Iteration stops as soon as a match is found.
+ */
+export function none<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): boolean {
+    const iter = iterate(source);
+
+    if (typeof predicate !== 'function') {
+        predicate = _truthyPredicate;
+    }
+
+    let i = 0;
+
+    for (const item of iter) {
+        if (predicate(item, i++)) { return false; }
+    }
+
+    return true;
 }
 
 /**
@@ -400,9 +440,9 @@ export function count<T>(iter: Iterable<T>, predicate?: PredicateFunction<T>): n
 /**
  * Returns an iterable whose items are arrays, each containing the nth item from
  * each iterable passed in the arguments.
- * 
+ *
  * Iteration stops as soon as one iterable is exhausted. No item is yielded then.
- * 
+ *
  * [...zip([1, 2, 3], ['hi', 'hello'])] -> [[1, 'hi], [2, 'hello']]
  */
 export function* zip(...iterables: Iterable<any>[]): IterableIterator<Array<any>> {
@@ -426,32 +466,32 @@ export function* zip(...iterables: Iterable<any>[]): IterableIterator<Array<any>
 
 export function* groupBy<T, K>(iter: Iterable<T>, keySelector?: KeyFunction<T, K>): IterableIterator<Grouping<K, T>> {
     const groups = new Map<K, Array<T>>();
-    
+
     if (typeof keySelector !== 'function') {
         keySelector = v => v as any;
     }
-    
+
     for (const item of iter) {
         const key = keySelector(item);
         let values: Array<T>;
-        
-        if (!groups.has(key)) { 
-            values = []; 
-            groups.set(key, values); 
+
+        if (!groups.has(key)) {
+            values = [];
+            groups.set(key, values);
         } else {
             values = groups.get(key);
         }
-        
+
         values.push(item);
-    }    
-    
-    for (const pair of groups) {    
+    }
+
+    for (const pair of groups) {
         const key = pair[0];
         const values = iterate(pair[1]);
-        
-        yield { 
-            key, 
-            [Symbol.iterator]: () => values 
+
+        yield {
+            key,
+            [Symbol.iterator]: () => values
         };
     }
 }
@@ -459,7 +499,7 @@ export function* groupBy<T, K>(iter: Iterable<T>, keySelector?: KeyFunction<T, K
 /**
  * Implementation of [groupBy] for sources that are known
  * to have their keys already sorted.
- * 
+ *
  * The implementation was adapted from Python's itertools:
  * https://docs.python.org/3/library/itertools.html#itertools.groupby
  */
@@ -467,41 +507,41 @@ export function* sortedGroupBy<T, K>(iter: Iterable<T>, keySelector?: KeyFunctio
     if (typeof keySelector !== 'function') {
         keySelector = v => v as any;
     }
-    
+
     const items = iterate(iter);
-    
+
     let targetKey: K;
     let currentKey: K;
     let currentValue: T;
-    
+
     while (true) {
         while (currentKey === targetKey) {
             const currentIteration = items.next();
-            
+
             if (currentIteration.done) { return; }
-            
+
             currentValue = currentIteration.value;
-            
+
             currentKey = keySelector(currentValue);
         }
-        
+
         targetKey = currentKey;
-        
-        yield { 
-            key: currentKey, 
+
+        yield {
+            key: currentKey,
             *[Symbol.iterator]() {
                 while (currentKey === targetKey) {
                     yield currentValue;
-                    
+
                     const currentIteration = items.next();
-                    
+
                     if (currentIteration.done) { return; }
-                    
+
                     currentValue = currentIteration.value;
-                    
+
                     currentKey = keySelector(currentValue);
-                }        
-            } 
+                }
+            }
         };
     }
 }

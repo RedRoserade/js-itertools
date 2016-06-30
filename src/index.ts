@@ -20,6 +20,7 @@ function iterable<T>(items: Iterable<T>): ChainableIterable<T> {
         skipWhile: (fn) => iterable(impl.skipWhile(_items, fn)),
         chain: (...iterables) => iterable(impl.chain(_items, ...iterables)),
         some: (fn?) => impl.some(_items, fn),
+        none: (fn?) => impl.none(_items, fn),
         every: (fn) => impl.every(_items, fn),
         includes: (item) => impl.includes(_items, item),
         reduce: (fn, initial?) => impl.reduce(_items, fn, initial),
@@ -40,5 +41,6 @@ function iterable<T>(items: Iterable<T>): ChainableIterable<T> {
 
 export function repeat<T>(item: T, count?: number) { return iterable(impl.repeat(item, count)); }
 export function range(start: number, count?: number) { return iterable(impl.range(start, count)); }
+export function between(start: number, end: number, inclusive?: boolean) { return iterable(impl.between(start, end, inclusive)); }
 
 export default iterable;
