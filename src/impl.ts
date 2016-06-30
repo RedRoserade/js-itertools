@@ -568,3 +568,97 @@ export function toMap<K, V, T>(iter: Iterable<T>, keySelector: KeyFunction<T, K>
         }())
     );
 }
+
+export function* intersperse<T>(iter: Iterable<T>, interspersed: T): IterableIterator<T> {
+    const iterable = iterate(iter);
+
+    const result = iterable.next();
+
+    if (result.done) { return; }
+
+    yield result.value;
+
+    for (const item of iterable) {
+        yield interspersed;
+        yield item;
+    }
+}
+
+export function* innerJoin<TOuter, TInner, K>(outer: Iterable<TOuter>, inner: Iterable<TInner>, outerKey: KeyFunction<TOuter, K>, innerKey: KeyFunction<TInner, K>): IterableIterator<[TOuter, TInner]> {
+    const lookup = new Map(map(groupBy(inner, innerKey), g => (<[K, Array<TInner>]>[g.key, Array.from(g)])));
+
+    for (const item of outer) {
+        const g = lookup.get(outerKey(item));
+
+        if (g !== undefined) {
+            for (const element of g) {
+                yield [item, element];
+            }
+        }
+    }
+}
+
+export function* leftJoin<TOuter, TInner, K>(outer: Iterable<TOuter>, inner: Iterable<TInner>, outerKey: KeyFunction<TOuter, K>, innerKey: KeyFunction<TInner, K>): IterableIterator<[TOuter, TInner]> {
+    const lookup = new Map(map(groupBy(inner, innerKey), g => (<[K, Array<TInner>]>[g.key, Array.from(g)])));
+
+    for (const item of outer) {
+        const g = lookup.get(outerKey(item));
+
+        if (g !== undefined) {
+            for (const element of g) {
+                yield [item, element];
+            }
+        } else {
+            yield [item, undefined];
+        }
+    }
+}
+
+export function* rightJoin<TOuter, TInner, K>(outer: Iterable<TOuter>, inner: Iterable<TInner>, outerKey: KeyFunction<TOuter, K>, innerKey: KeyFunction<TInner, K>): IterableIterator<[TOuter, TInner]> {
+    const lookup = new Map(map(groupBy(outer, outerKey), g => (<[K, Array<TOuter>]>[g.key, Array.from(g)])));
+
+    for (const item of inner) {
+        const g = lookup.get(innerKey(item));
+
+        if (g !== undefined) {
+            for (const element of g) {
+                yield [element, item];
+            }
+        } else {
+            yield [undefined, item];
+        }
+    }
+}
+
+export function* fullJoin<TOuter, TInner, K>(outer: Iterable<TOuter>, inner: Iterable<TInner>, outerKey: KeyFunction<TOuter, K>, innerKey: KeyFunction<TInner, K>): IterableIterator<[TOuter, TInner]> {
+    const innerLookup = new Map(map(groupBy(inner, innerKey), g => (<[K, Array<TInner>]>[g.key, Array.from(g)])));
+    const outerLookup = new Map(map(groupBy(outer, outerKey), g => (<[K, Array<TOuter>]>[g.key, Array.from(g)])));
+
+    for (const outerKey of outerLookup.keys()) {
+        if (!innerLookup.has(outerKey)) {
+            innerLookup.set(outerKey, undefined);
+        }
+    }
+
+    for (const pair of innerLookup) {
+        const key = pair[0];
+        const innerItems = pair[1];
+        const outerItems = outerLookup.get(key);
+
+        if (innerItems !== undefined) {
+            for (const innerItem of innerItems) {
+                if (outerItems !== undefined) {
+                    for (const outerItem of outerItems) {
+                        yield [outerItem, innerItem];
+                    }
+                } else {
+                    yield [undefined, innerItem];
+                }
+            }
+        } else {
+            for (const outerItem of outerItems) {
+                yield [outerItem, undefined];
+            }
+        }
+    }
+}
