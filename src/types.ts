@@ -1,6 +1,6 @@
-export type PredicateFunction<T> = (item: T, index?: number) => boolean;
+export type PredicateFunction<T> = (item: T, index: number) => boolean;
 
-export type SelectorFunction<T, U> = (item: T, index?: number) => U;
+export type SelectorFunction<T, U> = (item: T, index: number) => U;
 
 export type UnitFunction<T> = () => T;
 
@@ -11,6 +11,17 @@ export type KeyFunction<T, K> = (item: T) => K;
 export type Grouping<K, T> = { key: K, [Symbol.iterator](): Iterator<T> };
 
 export type Action<T> = (item: T) => void;
+
+/**
+ * A lookup is a map whose values are arrays.
+ */
+export type Lookup<K, T> = Map<K, Array<T>>;
+
+/**
+ * A collector function, similar to a reducer function, is a function
+ * that takes a sequence of values and produces a single result.
+ */
+export type Collector<T, R> = (seq: Iterable<T>) => R;
 
 export interface IChainableIterable<T> {
     /**
@@ -99,10 +110,6 @@ export interface IChainableIterable<T> {
      */
     count(fn?: PredicateFunction<T>): number;
     /**
-     * Allows passing any function that returns an iterable.
-     */
-    transformWith<U>(fn: (iterable: Iterable<T>, ...args: any[]) => Iterable<U>, ...args: any[]): IChainableIterable<U>;
-    /**
      * Returns an iterable whose items are arrays, each containing the nth item from
      * each iterable passed in the arguments.
      *
@@ -112,12 +119,12 @@ export interface IChainableIterable<T> {
     /**
      * Groups items by a key.
      */
-    groupBy<K>(keySelector: KeyFunction<K, T>): IChainableIterable<Grouping<K, T>>;
+    toLookup<K>(keySelector: KeyFunction<K, T>): Lookup<K, T>;
     /**
      * Version of [groupBy] that's optimized for sequences that are known to be
      * already sorted by the key.
      */
-    sortedGroupBy<K>(keySelector: KeyFunction<K, T>): IChainableIterable<Grouping<K, T>>;
+    groupBy<K>(keySelector: KeyFunction<K, T>): IChainableIterable<Grouping<K, T>>;
     /**
      * Calls the function for each item in this sequence.
      */
@@ -134,4 +141,11 @@ export interface IChainableIterable<T> {
      * Converts the current sequence into a Map.
      */
     toMap<K, V>(keySelector: KeyFunction<T, K>, valueSelector: KeyFunction<T, V>): Map<K, V>;
+
+    /**
+     * Similar to [reduce], takes a function by parameter
+     * which is called with the current sequence of values,
+     * and produces a single result.
+     */
+    collect<T, R>(collector: Collector<T, R>): R;
 };

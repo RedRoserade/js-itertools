@@ -6,123 +6,108 @@ import {
     Grouping,
     KeyFunction,
     Action,
-    IChainableIterable
+    IChainableIterable,
+    Collector
 } from './types';
 
-import * as impl from './impl';
+import * as transformers from './transformers-impl';
+import * as collectors from './collectors-impl';
+import * as generators from './generators-impl';
 
 import { iterate } from './util';
 
-export default function iter<T>(items: Iterable<T>): IChainableIterable<T> {
+export default function chain<T>(items: Iterable<T>): IChainableIterable<T> {
 
-    let _items: IterableIterator<any> = iterate(items);
+    const _items: IterableIterator<any> = iterate(items);
 
-    const monad = Object.create(null);
+    const monad: IChainableIterable<T> = Object.create(null);
 
     monad[Symbol.iterator] = function () {
         return _items;
     }
     monad.map = function map<U>(fn: SelectorFunction<T, U>) {
-        _items = impl.map(_items, fn);
-
-        return iter(_items);
+        return chain(transformers.map(_items, fn));
     }
     monad.flatMap = function flatMap<U>(fn: SelectorFunction<T, Iterable<U>>) {
-        _items = impl.flatMap(_items, fn);
-
-        return iter(_items);
+        return chain(transformers.flatMap(_items, fn));
     }
     monad.filter = function filter(fn: PredicateFunction<T>) {
-        _items = impl.filter(_items, fn);
-
-        return iter(_items);
+        return chain(transformers.filter(_items, fn));
     }
     monad.take = function take(count: number) {
-        _items = impl.take(_items, count);
-
-        return iter(_items);
+        return chain(transformers.take(_items, count));
     }
     monad.takeWhile = function takeWhile(fn: PredicateFunction<T>) {
-        _items = impl.takeWhile(_items, fn);
-        return iter(_items);
+        return chain(transformers.takeWhile(_items, fn));
     }
     monad.skip = function skip(count: number) {
-        _items = impl.skip(_items, count);
-        return iter(_items);
+        return chain(transformers.skip(_items, count));
     }
     monad.skipWhile = function skipWhile(fn: PredicateFunction<T>) {
-        _items = impl.skipWhile(_items, fn);
-        return iter(_items);
+        return chain(transformers.skipWhile(_items, fn));
     }
     monad.chain = function chain(...others: Iterable<T>[]) {
-        _items = impl.chain(_items, ...others);
-        return iter(_items);
+        return chain(transformers.chain(_items, ...others));
     }
     monad.some = function some(fn?: PredicateFunction<T>) {
-        return impl.some(_items, fn);
+        return collectors.some(_items, fn);
     }
     monad.none = function none(fn?: PredicateFunction<T>) {
-        return impl.none(_items, fn);
+        return collectors.none(_items, fn);
     }
     monad.every = function every(fn: PredicateFunction<T>) {
-        return impl.every(_items, fn);
+        return collectors.every(_items, fn);
     }
     monad.includes = function includes(item: T) {
-        return impl.includes(_items, item);
+        return collectors.includes(_items, item);
     }
     monad.reduce = function reduce<U>(fn: ReducerFunction<T, U>, defaultValue?: U) {
-        return impl.reduce(_items, fn, defaultValue);
+        return collectors.reduce(_items, fn, defaultValue);
     }
     monad.single = function single(predicate?: PredicateFunction<T>) {
-        return impl.single(_items, predicate);
+        return collectors.single(_items, predicate);
     }
     monad.first = function first(fn?: PredicateFunction<T>) {
-        return impl.first(_items, fn);
+        return collectors.first(_items, fn);
     }
     monad.last = function last(fn?: PredicateFunction<T>) {
-        return impl.last(_items, fn);
+        return collectors.last(_items, fn);
     }
     monad.count = function count(fn?: PredicateFunction<T>) {
-        return impl.count(_items, fn);
-    }
-    monad.transformWith = function transformWith<U>(fn: (iterable: Iterable<T>, ...args: any[]) => Iterable<U>, ...args: any[]) {
-        _items = iterate(fn(_items, ...args));
-
-        return iter(_items);
+        return collectors.count(_items, fn);
     }
     monad.zip = function zip(...iterables: Iterable<any>[]) {
-        _items = impl.zip(_items, ...iterables);
-
-        return iter(_items);
+        return chain(transformers.zip(_items, ...iterables));
+    }
+    monad.toLookup = function toLookup<K>(keySelector: KeyFunction<K, T>) {
+        return collectors.toLookup(_items, keySelector);
     }
     monad.groupBy = function groupBy<K>(keySelector: KeyFunction<K, T>) {
-        _items = impl.groupBy(_items, keySelector);
-
-        return iter(_items);
-    }
-    monad.sortedGroupBy = function sortedGroupBy<K>(keySelector: KeyFunction<K, T>) {
-        _items = impl.sortedGroupBy(_items, keySelector);
-
-        return iter(_items);
+        return chain(transformers.groupBy(_items, keySelector));
     }
     monad.forEach = function forEach(fn: Action<T>) {
-        impl.forEach(_items, fn);
+        transformers.forEach(_items, fn);
     }
     monad.toArray = function toArray() {
         return Array.from(_items);
     }
     monad.toSet = function toSet() {
-        return new Set(_items);
+        return collectors.toSet(_items);
     }
     monad.toMap = function toMap<K, V>(keySelector: KeyFunction<T, K>, valueSelector: KeyFunction<T, V>) {
-        return impl.toMap(_items, keySelector, valueSelector);
+        return collectors.toMap(_items, keySelector, valueSelector);
+    }
+    monad.collect = function collect<T, R>(collector: Collector<T, R>): R {
+        return collector(_items);
     }
 
     return monad;
 };
 
-export function repeat<T>(item: T, count?: number) { return iter(impl.repeat(item, count)); }
+export function repeat<T>(item: T, count?: number) { return chain(generators.repeat(item, count)); }
 
-export function range(start: number, count?: number) { return iter(impl.range(start, count)); }
+export function range(start: number, count?: number) { return chain(generators.range(start, count)); }
 
-export function between(start: number, end: number, inclusive?: boolean) { return iter(impl.between(start, end, inclusive)); }
+export function between(start: number, end: number, inclusive?: boolean) { return chain(generators.between(start, end, inclusive)); }
+
+export function sequence<T>(seq: Array<T>) { return chain(generators.sequence(seq)); }
