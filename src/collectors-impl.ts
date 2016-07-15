@@ -230,17 +230,7 @@ export function includes<T>(iter: Iterable<T>, test: T): boolean {
     return false;
 }
 
-
-
-/**
- * Returns the single item present in [source] that matches the [predicate].
- *
- * If [predicate] is absent, the sole item is returned.
- *
- * This method will throw if the sequence is empty or contains more than one elements
- * that match [predicate], or if the sequence contains more than one item (when [predicate] is not present).
- */
-export function single<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): T {
+function singleOrElse<T>(source: Iterable<T>, whenNone: () => T, predicate?: PredicateFunction<T>): T {
     if (typeof predicate === 'undefined') {
         predicate = truePredicate;
     }
@@ -258,18 +248,30 @@ export function single<T>(source: Iterable<T>, predicate?: PredicateFunction<T>)
         }
     }
 
-    fail(timesFound === 0, 'Sequence contains no matching element.');
+    if (timesFound === 0) {
+        return whenNone();
+    }
 
     return foundItem;
 }
 
 /**
- * Returns the first item in [source] that matches [predicate]. Iteration stops
- * as soon as the item is found.
+ * Returns the single item present in [source] that matches the [predicate].
  *
- * If no item matches and the sequence is exhausted, an error is thrown.
+ * If [predicate] is absent, the sole item is returned.
+ *
+ * This method will throw if the sequence is empty or contains more than one elements
+ * that match [predicate], or if the sequence contains more than one item (when [predicate] is not present).
  */
-export function first<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): T {
+export function single<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): T {
+    return singleOrElse(source, () => fail(true, 'Sequence contains no matching element.') as any, predicate);
+}
+
+export function singleOrNone<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): T {
+    return singleOrElse(source, () => undefined, predicate);
+}
+
+function firstOrElse<T>(source: Iterable<T>, orElse: () => T, predicate?: PredicateFunction<T>): T {
 
     if (typeof predicate === 'undefined') {
         predicate = truePredicate;
@@ -284,16 +286,25 @@ export function first<T>(source: Iterable<T>, predicate?: PredicateFunction<T>):
         }
     }
     // We only get here if no item was found.
-    fail(true, 'Sequence contains no matching elements.');
+    return orElse();
 }
 
 /**
- * Returns the last item in [iter] that matches [predicate]. This will consume
- * the whole iterable.
+ * Returns the first item in [source] that matches [predicate]. Iteration stops
+ * as soon as the item is found.
  *
  * If no item matches and the sequence is exhausted, an error is thrown.
  */
-export function last<T>(iter: Iterable<T>, predicate?: PredicateFunction<T>): T {
+export function first<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): T {
+    return firstOrElse(source, () => fail(true, 'Sequence contains no matching elements.') as any, predicate);
+}
+
+export function firstOrNone<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): T {
+    return firstOrElse(source, () => undefined, predicate);
+}
+
+
+function lastOrElse<T>(iter: Iterable<T>, orElse: () => T, predicate?: PredicateFunction<T>): T {
     if (typeof predicate === 'undefined') {
         predicate = truePredicate;
     }
@@ -308,7 +319,23 @@ export function last<T>(iter: Iterable<T>, predicate?: PredicateFunction<T>): T 
         }
     }
 
-    fail(!found, 'Sequence contains no matching elements.');
+    if (!found) {
+        return orElse();
+    }
 
     return match;
+}
+
+/**
+ * Returns the last item in [iter] that matches [predicate]. This will consume
+ * the whole iterable.
+ *
+ * If no item matches and the sequence is exhausted, an error is thrown.
+ */
+export function last<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): T {
+    return lastOrElse(source, () => fail(true, 'Sequence contains no matching elements.') as any, predicate);
+}
+
+export function lastOrNone<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): T {
+    return lastOrElse(source, () => undefined, predicate);
 }
