@@ -69,7 +69,7 @@ export function take<T>(iter: Iterable<T>, count: number): IterableIterator<T> {
         let taken = 0;
 
         for (const item of iter) {
-            if (taken++ < count) {
+            if (++taken < count) {
                 yield item;
             } else {
                 return;
@@ -217,15 +217,6 @@ export function* groupBy<T, K>(iter: Iterable<T>, keySelector?: KeyFunction<T, K
                 }
             }
         };
-    }
-}
-
-/**
- * Executes [fn] for each item in [iter].
- */
-export function forEach<T>(iter: Iterable<T>, fn: Action<T>) {
-    for (const item of iter) {
-        fn(item);
     }
 }
 

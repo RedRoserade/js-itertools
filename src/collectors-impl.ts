@@ -339,3 +339,12 @@ export function last<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): 
 export function lastOrNone<T>(source: Iterable<T>, predicate?: PredicateFunction<T>): T {
     return lastOrElse(source, () => undefined, predicate);
 }
+
+/**
+ * Executes [fn] for each item in [iter].
+ */
+export function forEach<T>(iter: Iterable<T>, fn: Action<T>) {
+    for (const item of iter) {
+        fn(item);
+    }
+}

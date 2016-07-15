@@ -1,17 +1,17 @@
-var impl = require('../lib/impl');
+var impl = require('../lib/transformers-impl');
 
 var left = [
-	{ a: 1, b: 'l1' },
-	{ a: 1, b: 'l2' },
-	{ a: 2, b: 'l3' },
+    { a: 1, b: 'l1' },
+    { a: 1, b: 'l2' },
+    { a: 2, b: 'l3' },
     { a: 3, b: 'l4' },
     { a: 3, b: 'l5' }
 ];
 
 var right = [
-	{ a: 1, b: 'r1' },
-	{ a: 2, b: 'r2' },
-	{ a: 2, b: 'r3' },
+    { a: 1, b: 'r1' },
+    { a: 2, b: 'r2' },
+    { a: 2, b: 'r3' },
     { a: 4, b: 'r4' },
     { a: 4, b: 'r5' }
 ];

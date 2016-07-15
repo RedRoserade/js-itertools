@@ -25,80 +25,83 @@ export default function chain<T>(items: Iterable<T>): IChainableIterable<T> {
     monad[Symbol.iterator] = function () {
         return _items;
     }
-    monad.map = function map<U>(fn: SelectorFunction<T, U>) {
+    monad.map = function <U>(fn: SelectorFunction<T, U>) {
         return chain(transformers.map(_items, fn));
     }
-    monad.flatMap = function flatMap<U>(fn: SelectorFunction<T, Iterable<U>>) {
+    monad.flatMap = function <U>(fn: SelectorFunction<T, Iterable<U>>) {
         return chain(transformers.flatMap(_items, fn));
     }
-    monad.filter = function filter(fn: PredicateFunction<T>) {
+    monad.filter = function (fn: PredicateFunction<T>) {
         return chain(transformers.filter(_items, fn));
     }
-    monad.take = function take(count: number) {
+    monad.take = function (count: number) {
         return chain(transformers.take(_items, count));
     }
-    monad.takeWhile = function takeWhile(fn: PredicateFunction<T>) {
+    monad.takeWhile = function (fn: PredicateFunction<T>) {
         return chain(transformers.takeWhile(_items, fn));
     }
-    monad.skip = function skip(count: number) {
+    monad.skip = function (count: number) {
         return chain(transformers.skip(_items, count));
     }
-    monad.skipWhile = function skipWhile(fn: PredicateFunction<T>) {
+    monad.skipWhile = function (fn: PredicateFunction<T>) {
         return chain(transformers.skipWhile(_items, fn));
     }
-    monad.chain = function chain(...others: Iterable<T>[]) {
+    monad.chain = function (...others: Iterable<T>[]) {
         return chain(transformers.chain(_items, ...others));
     }
-    monad.some = function some(fn?: PredicateFunction<T>) {
+    monad.some = function (fn?: PredicateFunction<T>) {
         return collectors.some(_items, fn);
     }
-    monad.none = function none(fn?: PredicateFunction<T>) {
+    monad.none = function (fn?: PredicateFunction<T>) {
         return collectors.none(_items, fn);
     }
-    monad.every = function every(fn: PredicateFunction<T>) {
+    monad.every = function (fn: PredicateFunction<T>) {
         return collectors.every(_items, fn);
     }
-    monad.includes = function includes(item: T) {
+    monad.includes = function (item: T) {
         return collectors.includes(_items, item);
     }
-    monad.reduce = function reduce<U>(fn: ReducerFunction<T, U>, defaultValue?: U) {
+    monad.reduce = function <U>(fn: ReducerFunction<T, U>, defaultValue?: U) {
         return collectors.reduce(_items, fn, defaultValue);
     }
-    monad.single = function single(predicate?: PredicateFunction<T>) {
+    monad.single = function (predicate?: PredicateFunction<T>) {
         return collectors.single(_items, predicate);
     }
-    monad.first = function first(fn?: PredicateFunction<T>) {
+    monad.first = function (fn?: PredicateFunction<T>) {
         return collectors.first(_items, fn);
     }
-    monad.last = function last(fn?: PredicateFunction<T>) {
+    monad.last = function (fn?: PredicateFunction<T>) {
         return collectors.last(_items, fn);
     }
-    monad.count = function count(fn?: PredicateFunction<T>) {
+    monad.count = function (fn?: PredicateFunction<T>) {
         return collectors.count(_items, fn);
     }
-    monad.zip = function zip(...iterables: Iterable<any>[]) {
+    monad.zip = function (...iterables: Iterable<any>[]) {
         return chain(transformers.zip(_items, ...iterables));
     }
-    monad.toLookup = function toLookup<K>(keySelector: KeyFunction<K, T>) {
+    monad.toLookup = function <K>(keySelector: KeyFunction<K, T>) {
         return collectors.toLookup(_items, keySelector);
     }
-    monad.groupBy = function groupBy<K>(keySelector: KeyFunction<K, T>) {
+    monad.groupBy = function <K>(keySelector: KeyFunction<K, T>) {
         return chain(transformers.groupBy(_items, keySelector));
     }
-    monad.forEach = function forEach(fn: Action<T>) {
-        transformers.forEach(_items, fn);
+    monad.forEach = function (fn: Action<T>) {
+        collectors.forEach(_items, fn);
     }
-    monad.toArray = function toArray() {
+    monad.toArray = function () {
         return Array.from(_items);
     }
-    monad.toSet = function toSet() {
+    monad.toSet = function () {
         return collectors.toSet(_items);
     }
-    monad.toMap = function toMap<K, V>(keySelector: KeyFunction<T, K>, valueSelector: KeyFunction<T, V>) {
+    monad.toMap = function <K, V>(keySelector: KeyFunction<T, K>, valueSelector: KeyFunction<T, V>) {
         return collectors.toMap(_items, keySelector, valueSelector);
     }
-    monad.collect = function collect<T, R>(collector: Collector<T, R>): R {
+    monad.collect = function <T, R>(collector: Collector<T, R>): R {
         return collector(_items);
+    }
+    monad.intersperse = function <T>(item: T) {
+        return chain(transformers.intersperse(_items, item));
     }
 
     return monad;

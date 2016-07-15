@@ -148,4 +148,6 @@ export interface IChainableIterable<T> {
      * and produces a single result.
      */
     collect<T, R>(collector: Collector<T, R>): R;
+
+    intersperse<T>(seq: Iterable<T>, item: T): IChainableIterable<T>;
 };
