@@ -3,7 +3,7 @@ export function* iterate<T>(source: Iterable<T>) {
 }
 
 /**
- * Throws a TypeError if [cond] is true.
+ * Throws TypeError if [cond] is true.
  */
 export function fail(cond, msg) { if (cond) { throw new TypeError(msg); } }
 

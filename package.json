@@ -1,20 +1,24 @@
 {
   "name": "js-itertools",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Provides utility functions (map, reduce, and so on) that work on top of ES2015's generators. Requires node 4 or above.",
   "main": "lib/index.js",
   "scripts": {
-    "build": "rimraf dist && rimraf lib && tsc && babel dist/src --out-dir lib && rimraf dist",
-    "test": "mocha dist/test --recursive --es_staging",
+    "build": "rimraf lib && tsc",
+    "test": "mocha lib/test --recursive",
     "ts:watch": "tsc -w",
-    "test:watch": "mocha dist/test --recursive --watch --es_staging",
+    "test:watch": "mocha lib/test --recursive --watch",
     "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/RedRoserade/js-itertools.git"
   },
-  "keywords": ["generator", "linq", "es2015"],
+  "keywords": [
+    "generator",
+    "linq",
+    "es2015"
+  ],
   "author": "André Carvalho <afecarvalho@gmail.com>",
   "license": "MIT",
   "bugs": {
@@ -22,27 +26,17 @@
   },
   "homepage": "https://github.com/RedRoserade/js-itertools#readme",
   "devDependencies": {
-    "babel-cli": "^6.7.5",
-    "babel-core": "^6.7.6",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.7.4",
-    "babel-plugin-transform-es2015-parameters": "^6.7.0",
-    "babel-plugin-transform-es2015-spread": "^6.6.5",
+    "@types/chai": "^3.4.34",
+    "@types/mocha": "^2.2.32",
     "chai": "^3.5.0",
     "mocha": "^2.4.5",
     "rimraf": "^2.5.2",
-    "typescript": "~1.8.9"
-  },
-  "babel": {
-    "plugins": [
-      "transform-es2015-modules-commonjs",
-      "transform-es2015-parameters",
-      "transform-es2015-spread"
-    ]
+    "typescript": "~2.0.0"
   },
   "engines": {
-      "node": ">=4.0.0"
+    "node": ">=6.0.0"
   },
   "files": [
-      "lib"
+    "lib"
   ]
 }

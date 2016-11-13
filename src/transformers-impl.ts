@@ -69,7 +69,7 @@ export function take<T>(iter: Iterable<T>, count: number): IterableIterator<T> {
         let taken = 0;
 
         for (const item of iter) {
-            if (++taken < count) {
+            if (taken++ < count) {
                 yield item;
             } else {
                 return;
