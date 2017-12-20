@@ -1,8 +1,8 @@
 {
   "name": "js-itertools",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Provides utility functions (map, reduce, and so on) that work on top of ES2015's generators. Requires node 4 or above.",
-  "main": "lib/index.js",
+  "main": "lib/src/index.js",
   "scripts": {
     "build": "rimraf lib && tsc",
     "test": "mocha lib/test --recursive",
